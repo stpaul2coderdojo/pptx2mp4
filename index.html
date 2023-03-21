@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Generate MP4 from PPTX</title>
+</head>
+<body>
+  <h1>Generate MP4 from PPTX</h1>
+
+  <div id="output"></div>
+
+ 
+  <script src="generateRichCardMP4.js"></script>
+  <script>
+    const { promisify } = require('util');
+
+    const outputDiv = document.querySelector('#output');
+
+    async function generateMP4s() {
+      try {
+        const pptxFiles = await listPptxFiles('./test');
+        for (let i = 0; i < pptxFiles.length; i++) {
+          const pptxFile = pptxFiles[i];
+          const fileName = pptxFile.name;
+          const progressId = `progress_${i}`;
+          const progressBar = document.createElement('progress');
+          progressBar.id = progressId;
+          progressBar.value = 0;
+          progressBar.max = 100;
+          outputDiv.appendChild(document.createTextNode(`Generating MP4 from ${fileName}: `));
+          outputDiv.appendChild(progressBar);
+          outputDiv.appendChild(document.createElement('br'));
+          const pptxPath = `./test/${fileName}`;
+          await generateRichCardsMp4(pptxPath);
+          progressBar.value = 100;
+          outputDiv.appendChild(document.createTextNode(`Completed ${fileName}`));
+          outputDiv.appendChild(document.createElement('br'));
+        }
+      } catch (error) {
+        outputDiv.appendChild(document.createTextNode(`Error: ${error.message}`));
+        outputDiv.appendChild(document.createElement('br'));
+      }
+    }
+
+    async function listPptxFiles(directory) {
+      const files = await promisify(fs.readdir)(directory, { withFileTypes: true });
+      return files.filter(file => file.isFile() && file.name.endsWith('.pptx'));
+    }
+
+    generateMP4s();
+  </script>
+</body>
+</html>
